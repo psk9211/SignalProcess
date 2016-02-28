@@ -7,10 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyaudio
 
-TITLE = ''
-WIDTH = 1280
-HEIGHT = 720
-FPS = 25.0
+FPS = 60.0
 
 nFFT = 512
 BUF_SIZE = 4 * nFFT
@@ -30,7 +27,7 @@ def animate(i, line, stream, MAX_y,rs):
     Y_L = np.fft.fft(y_L, nFFT)
 
     # Sewing FFT of two channels together, DC part uses right channel's
-    Y = np.abs(Y_L)[1:21]
+    Y = np.abs(Y_L)[0:50]
 
     for h,r in zip(Y,rs):
         r.set_height(h)
@@ -38,15 +35,16 @@ def animate(i, line, stream, MAX_y,rs):
 
 def init(line,rs):
     # This data is a clear frame for animation
-    for h,r in zip(np.zeros(nFFT)[1:21],rs):
+    for h,r in zip(np.zeros(nFFT)[0:50],rs):
         r.set_height(h)
     return rs
 
 
 def main():
     fig = plt.figure()
-    line = plt.bar(range(20), np.zeros(nFFT)[1:21])
-    plt.ylim((0, 100))
+    line = plt.bar(range(50), np.zeros(nFFT)[0:50])
+    plt.ylim((0, 50))
+    plt.xlim((0, 50))
 
     rs = [r for r in line]
 
