@@ -15,7 +15,12 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
 
+CUTFREQ = 50
+MAX_top = 25
+
 def animate(i, line, stream, MAX_y,rs):
+    # Softmax for good feature
+    softmax = lambda x:MAX_top*2/(1 + np.exp(-x))-(MAX_top)
     # Read n*nFFT frames from stream, n > 0
     N = max(stream.get_read_available() / nFFT, 1) * nFFT
     data = stream.read(N)
@@ -27,7 +32,7 @@ def animate(i, line, stream, MAX_y,rs):
     Y_L = np.fft.fft(y_L, nFFT)
 
     # Sewing FFT of two channels together, DC part uses right channel's
-    Y = np.abs(Y_L)[0:50]
+    Y = softmax(np.abs(Y_L)[0:CUTFREQ])
 
     for h,r in zip(Y,rs):
         r.set_height(h)
@@ -35,16 +40,16 @@ def animate(i, line, stream, MAX_y,rs):
 
 def init(line,rs):
     # This data is a clear frame for animation
-    for h,r in zip(np.zeros(nFFT)[0:50],rs):
+    for h,r in zip(np.zeros(nFFT)[0:CUTFREQ],rs):
         r.set_height(h)
     return rs
 
 
 def main():
     fig = plt.figure()
-    line = plt.bar(range(50), np.zeros(nFFT)[0:50])
-    plt.ylim((0, 50))
-    plt.xlim((0, 50))
+    line = plt.bar(range(CUTFREQ), np.zeros(nFFT)[0:CUTFREQ])
+    plt.ylim((0, MAX_top))
+    plt.xlim((0, CUTFREQ))
 
     rs = [r for r in line]
 
